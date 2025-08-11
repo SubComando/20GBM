@@ -1,0 +1,113 @@
+.painel-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  /* TOPO */
+  .topo-siga {
+    background-color: #d82222; /* Vermelho fechado próximo ao da logo */
+    color: white;
+    padding: 8px 20px;
+  }
+  
+  .logo-siga {
+    height: 60px; /* tamanho proporcional */
+    width: auto;
+    object-fit: contain;
+    margin-right: 15px;
+  }
+  
+  .titulo-siga {
+    font-size: 1.4rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-align: center;
+  }
+  
+  /* CONTEÚDO */
+  .conteudo-siga {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+  
+  /* MENU LATERAL */
+  .menu-lateral {
+    width: 250px;
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+  }
+  
+  .foto-perfil {
+    width: 100%;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .menu-lateral p {
+    margin: 0 0 6px;
+    font-size: 0.9rem;
+  }
+  
+  .links-uteis a {
+    display: block;
+    margin: 5px 0;
+    color: #b71c1c; /* Mesmo tom do topo */
+    text-decoration: none;
+  }
+  
+  .links-uteis a:hover {
+    text-decoration: underline;
+  }
+  
+  /* MÓDULOS */
+  .painel-modulos {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .modulo-card {
+    padding: 15px;
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #ddd;
+    background-color: white;
+  }
+  
+  .modulo-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  
+  .icone-modulo {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+  }
+  
+  .nome-modulo {
+    font-weight: bold;
+    font-size: 0.95rem;
+  }
+  
+  /* RESPONSIVIDADE */
+  @media (max-width: 768px) {
+    .conteudo-siga {
+      flex-direction: column;
+    }
+  
+    .menu-lateral {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid #ddd;
+    }
+  
+    .titulo-siga {
+      font-size: 1.1rem;
+    }
+  }
+  

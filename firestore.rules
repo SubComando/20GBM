@@ -1,9 +1,10 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Qualquer coleção/documento
     match /{document=**} {
-      allow read, write: if true;
+      // Permite ler e escrever se estiver autenticado
+      allow read, write: if request.auth != null;
     }
   }
 }

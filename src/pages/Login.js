@@ -1,20 +1,28 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErro("");
+    setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, senha);
-      window.location.href = "/painel";
+      // Deixa o guard decidir entre painel ou completar-cadastro
+      navigate("/painel", { replace: true });
     } catch (err) {
       setErro("Email ou senha inválidos.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -27,11 +35,7 @@ export default function Login() {
         <img
           src="/image-33.png.webp"
           alt="Logo 20º GBM"
-          style={{
-            maxWidth: "120px",
-            height: "auto",
-            marginBottom: "10px",
-          }}
+          style={{ maxWidth: "120px", height: "auto", marginBottom: "10px" }}
         />
         <h4 className="fw-bold text-primary">Login - 20º GBM</h4>
       </div>
@@ -61,8 +65,8 @@ export default function Login() {
             required
           />
         </div>
-        <button className="btn btn-primary w-100" type="submit">
-          Entrar
+        <button className="btn btn-primary w-100" type="submit" disabled={loading}>
+          {loading ? "Entrando..." : "Entrar"}
         </button>
       </form>
     </div>

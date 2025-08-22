@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db, storage } from "../services/firebaseConfig";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { updateProfile, onAuthStateChanged } from "firebase/auth";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -22,23 +22,44 @@ export default function CompletarCadastro() {
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState("");
 
+  // Se não logado -> /login. Se já tiver perfil completo -> /painel.
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        navigate("/login");
+        navigate("/login", { replace: true });
         return;
       }
-      // preenche email e nome a partir do auth quando disponível
       setEmail(user.email || "");
       if (user.displayName) setNome(user.displayName);
       if (user.photoURL) setPreview(user.photoURL);
-    });
 
+      try {
+        const snap = await getDoc(doc(db, "usuarios", user.uid));
+        if (snap.exists()) {
+          const d = snap.data() || {};
+          const missing = !d.nome || !d.posto || !d.funcao;
+          if (!missing) {
+            navigate("/painel", { replace: true });
+            return;
+          }
+          // pré-preenche se existir algo
+          setNome(d.nome || user.displayName || "");
+          setNomeDeGuerra(d.nomeDeGuerra || "");
+          setPosto(d.posto || "");
+          setFuncao(d.funcao || "");
+          setSetor(d.setor || "");
+          setTelefone(d.telefone || "");
+          if (d.fotoURL) setPreview(d.fotoURL);
+        }
+      } catch (e) {
+        console.warn("Falha ao ler perfil:", e);
+      }
+    });
     return () => unsub();
   }, [navigate]);
 
   function handleFileChange(e) {
-    const f = e.target.files[0];
+    const f = e.target.files?.[0];
     if (f) {
       setFoto(f);
       setPreview(URL.createObjectURL(f));
@@ -60,13 +81,13 @@ export default function CompletarCadastro() {
       // upload da foto (se houver)
       let fotoURL = user.photoURL || "";
       if (foto) {
-        const ext = foto.name.split(".").pop();
+        const ext = (foto.name.split(".").pop() || "jpg").toLowerCase();
         const fileRef = ref(storage, `usuarios/${user.uid}/perfil_${Date.now()}.${ext}`);
         await uploadBytes(fileRef, foto);
         fotoURL = await getDownloadURL(fileRef);
       }
 
-      // gravar/atualizar documento no Firestore (merge: true para não sobrescrever acidentalmente)
+      // grava/atualiza documento no Firestore
       const userDocRef = doc(db, "usuarios", user.uid);
       await setDoc(
         userDocRef,
@@ -79,23 +100,23 @@ export default function CompletarCadastro() {
           telefone,
           email,
           fotoURL,
-          criadoEm: serverTimestamp()
+          criadoEm: serverTimestamp(),
+          atualizadoEm: serverTimestamp(),
         },
         { merge: true }
       );
 
-      // atualizar profile do Firebase Auth (opcional, mas útil)
+      // atualiza perfil do Auth (opcional)
       try {
         await updateProfile(user, {
           displayName: nome,
-          photoURL: fotoURL || user.photoURL || null
+          photoURL: fotoURL || user.photoURL || null,
         });
       } catch (upErr) {
         console.warn("Não foi possível atualizar auth profile:", upErr);
       }
 
-      // redireciona ao painel principal
-      navigate("/painel");
+      navigate("/painel", { replace: true });
     } catch (err) {
       console.error("Erro ao salvar cadastro:", err);
       setErro(err.message || "Erro ao salvar cadastro");
@@ -181,22 +202,12 @@ export default function CompletarCadastro() {
 
         <div className="mb-3">
           <label className="form-label">Email (não editável)</label>
-          <input
-            type="email"
-            className="form-control"
-            value={email}
-            disabled
-          />
+          <input type="email" className="form-control" value={email} disabled />
         </div>
 
         <div className="mb-3">
           <label className="form-label">Foto de perfil (opcional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            className="form-control"
-            onChange={handleFileChange}
-          />
+          <input type="file" accept="image/*" className="form-control" onChange={handleFileChange} />
           {preview && (
             <div className="mt-2">
               <p className="mb-1">Pré-visualização:</p>
@@ -216,7 +227,7 @@ export default function CompletarCadastro() {
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/painel")}
             disabled={loading}
           >
             Cancelar

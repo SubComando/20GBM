@@ -1,4 +1,30 @@
 {
-  "indexes": [],
+  "indexes": [
+    {
+      "collectionGroup": "militares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "nomeIndex", "order": "ASCENDING" },
+        { "fieldPath": "situacao", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "militares",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "posto", "order": "ASCENDING" },
+        { "fieldPath": "lotacaoAtual", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "escalas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "quadro", "order": "ASCENDING" },
+        { "fieldPath": "guarnicao", "order": "ASCENDING" },
+        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+      ]
+    }
+  ],
   "fieldOverrides": []
 }
